@@ -12,6 +12,35 @@ from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, Conve
 import telegram
 from telegram import ParseMode
 
+import os
+
+TOKEN = os.environ['TELEGRAM_TOKEN']
+
+import os
+from telegram import Update
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+
+TOKEN = os.environ['TELEGRAM_TOKEN']
+PORT = int(os.environ.get('PORT', '8443'))
+NAME = os.environ['TELEGRAM_APP_NAME']
+
+def start(update: Update, context):
+    context.bot.send_message(chat_id=update.effective_chat.id, text="Hello, world!")
+
+def echo(update: Update, context):
+    context.bot.send_message(chat_id=update.effective_chat.id, text=update.message.text)
+
+updater = Updater(TOKEN, use_context=True)
+dispatcher = updater.dispatcher
+dispatcher.add_handler(CommandHandler('start', start))
+dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, echo))
+
+updater.start_webhook(listen="0.0.0.0",
+                      port=PORT,
+                      url_path=TOKEN)
+updater.bot.setWebhook("https://{}.herokuapp.com/{}".format(NAME, TOKEN))
+updater.idle()
+
 
 
 import requests
