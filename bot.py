@@ -62,21 +62,50 @@ import random
 def generate_customer_id():
     return random.randint(1000, 9999)
 
+import psycopg2
 
 # з'єднання з базою даних
 conn = psycopg2.connect(
-    host="ec2-52-48-159-67.eu-west-1.compute.amazonaws.com",
-    database="d7lr098nlc0jn6",
-    user="yqluyjjwqokfic",
-    password="668a8e54a7943f0ebca500165b3aa9d9786df25ab6c31eb041e871475d3e53aa",
+    host="ec2-52-21-136-176.compute-1.amazonaws.com",
+    database="d6l13s3g28mnpc",
+    user="agnonzokrulkxz",
+    password="8dcb5e275362be4dd7123d2fde98a26c55c45638829756b69748ed07c0ffd2fe",
     port="5432"
 )
 
 # створення курсора для виконання запитів
 cur = conn.cursor()
+# створення таблиці orders
+cur.execute("""CREATE TABLE IF NOT EXISTS orders (
+                id SERIAL PRIMARY KEY,
+                topic VARCHAR(255) NOT NULL,
+                pages INTEGER NOT NULL,
+                uniqueness INTEGER NOT NULL,
+                deadline DATE NOT NULL,
+                comment TEXT,
+                timestamp TIMESTAMP DEFAULT NOW()
+            )""")
+conn.commit()
 
+def function_name(update, context):
+    user_id = generate_customer_id()
+    task_type = context.user_data['task_type']
+    topic = context.user_data['TOPIC']
+    pages = context.user_data['PAGES']
+    uniqueness = context.user_data['UNIQUENESS']
+    deadline = context.user_data['DEADLINE']
+    comment = context.user_data['COMMENT']
+
+    # вставка даних користувача в таблицю orders
+    cur.execute("INSERT INTO orders (id, topic, pages, uniqueness, deadline, comment) VALUES (%s, %s, %s, %s, %s, %s)",
+                (user_id, topic, pages, uniqueness, deadline, comment))
+    conn.commit()
+
+    # rest of the function code
 # виконання запиту
-cur.execute("SELECT * FROM mytable")
+cur.execute("SELECT * FROM orders")
+
+
 
 # отримання результатів запиту
 results = cur.fetchall()
@@ -289,15 +318,15 @@ def deadline(update, context):
     return COMMENT
 
 
-
 def comment(update, context):
     """Function to ask if there are any comments or additional materials"""
     text = "Можливо є коментар або методичка? Якщо так, напишіть коментар або надішліть файл."
     update.message.reply_text(text)
     return ConversationHandler.END
+import os
 
-DATABASE_URL = os.environ['DATABASE_URL']
-
+# отримайте URL бази даних зі змінної середовища
+DATABASE_URL = os.getenv('DATABASE_URL', 'ваш URL бази даних')
 
 def save_order_to_database(update: Update, context: CallbackContext):
     chat_id = update.message.chat_id
@@ -332,7 +361,9 @@ def save_order_to_database(update: Update, context: CallbackContext):
 
     context.bot.send_message(chat_id=os.environ['HEROKU_APP_NAME'], text=order_info, parse_mode=ParseMode.HTML)
 
-DATABASE_URL = os.environ['DATABASE_URL']
+
+
+
 
 def save_order_to_database(update: Update, context: CallbackContext):
     chat_id = update.message.chat_id
