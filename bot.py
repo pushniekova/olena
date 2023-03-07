@@ -14,7 +14,11 @@ from telegram import ParseMode
 
 
 
+import requests
 
+url = "https://api.telegram.org/bot<6201719090:AAHVmrXtpwRTD31h2XZtvF29S8sVr2VTOj8>/setWebhook?url=<https://glacial-thicket-96744.herokuapp.com/>"
+response = requests.get(url)
+print(response.content)
 
 def my_function(update: Update, context: CallbackContext):
     # function code here
