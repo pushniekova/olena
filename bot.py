@@ -289,6 +289,7 @@ def deadline(update, context):
     return COMMENT
 
 
+
 def comment(update, context):
     """Function to ask if there are any comments or additional materials"""
     text = "Можливо є коментар або методичка? Якщо так, напишіть коментар або надішліть файл."
